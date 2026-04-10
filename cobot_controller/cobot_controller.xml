@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<library path="mecanum_controller">
+  <class name="mecanum_controller/MecanumController"
+         type="mecanum_controller::MecanumController"
+         base_class_type="controller_interface::ControllerInterface">
+  <description>
+    system interface used by robot
+    </description>
+  </class>
+</library>

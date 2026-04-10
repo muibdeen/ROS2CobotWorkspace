@@ -1,0 +1,31 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 50
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+    mecanum_controller:
+      type: mecanum_controller/MecanumController
+
+
+mecanum_controller:
+  ros__parameters:
+    joints:
+      - joint2_to_joint1
+      - joint3_to_joint2
+      - joint4_to_joint3
+      - joint5_to_joint4
+      - joint_6_to_joint5
+    expected_joints: 6.0
+
+
+joint_state_broadcaster:
+  ros__parameters: 
+    joints:
+      - fl
+      - fr
+      - bl
+      - br
+    interfaces:
+      - velocity
+      - position
