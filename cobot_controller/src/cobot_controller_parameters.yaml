@@ -4,28 +4,31 @@ controller_manager:
 
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
-    mecanum_controller:
-      type: mecanum_controller/MecanumController
+    cobot_controller:
+      type: cobot_controller/CobotController
 
 
-mecanum_controller:
+cobot_controller:
   ros__parameters:
     joints:
-      - joint2_to_joint1
-      - joint3_to_joint2
-      - joint4_to_joint3
-      - joint5_to_joint4
-      - joint_6_to_joint5
+      - j1
+      - j2
+      - j3
+      - j4
+      - j5
+      - j6
     expected_joints: 6.0
 
 
 joint_state_broadcaster:
   ros__parameters: 
     joints:
-      - fl
-      - fr
-      - bl
-      - br
+      - j1
+      - j2
+      - j3
+      - j4
+      - j5
+      - j6
     interfaces:
-      - velocity
       - position
+      - velocity

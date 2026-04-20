@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<library path="cobot_hardware">
+  <class name="cobot_hardware/CobotHardware"
+         type="cobot_hardware::CobotHardware"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Hardware interface for the elephant robotics 6dof robotic arm.
+    </description>
+  </class>
+</library>

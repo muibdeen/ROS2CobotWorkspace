@@ -8,12 +8,12 @@
 #include "std_msgs/msg/float64_multi_array.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 
-namespace mecanum_controller
+namespace cobot_controller
 {
-  class MecanumController : public controller_interface::ControllerInterface
+  class CobotController : public controller_interface::ControllerInterface
   {
   public:
-  MecanumController();
+  CobotController();
     
   controller_interface::CallbackReturn on_init() override;
       

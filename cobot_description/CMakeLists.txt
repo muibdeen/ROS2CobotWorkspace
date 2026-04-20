@@ -28,6 +28,7 @@ assets
 description
 include
 src
+launch
 DESTINATION share/${PROJECT_NAME}
 )
 
