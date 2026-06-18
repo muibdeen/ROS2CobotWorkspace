@@ -1,0 +1,720 @@
+#usda 1.0
+(
+    customLayerData = {
+        string creator = "URDF USD Converter v0.1.2"
+    }
+    doc = """Generated from Composed Stage of root layer /tmp/tmplp_ddmzw/cobot_description.usdc
+
+
+Generated from Composed Stage of root layer /tmp/urdf_import_cobot_description_3_ir8oww/usdex_cobot_description/cobot_description.usdc
+
+
+Generated from Composed Stage of root layer /tmp/urdf_import_cobot_description_3_ir8oww/temp_cobot_description/cobot_description.usd
+
+
+Generated from Composed Stage of root layer /home/muib/nvidia-isaac/IsaacSim-ros_workspaces/cobot_ws/src/cobot_moveit2_config_june/cobot_description_2/payloads/base.usd
+"""
+    kilogramsPerUnit = 1
+    metersPerUnit = 1
+    upAxis = "Z"
+)
+
+def Scope "Instances"
+{
+    def Xform "tn__w_pi_cfl3qyV0" (
+        prepend references = @./geometries.usd@</Geometries/tn__w_pi_cfl3qyV0>
+    )
+    {
+        over "tn__w_pi_cfl3qyV0" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/tn__w_pi_cfl3qyV0/VisualMaterials/tn__w_pi_material_VtrBjio1>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "tn__w_pi_material_VtrBjio1" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_material_VtrBjio1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "tn__w_pi__2_kZd6yim0" (
+        prepend references = @./geometries.usd@</Geometries/tn__w_pi__2_kZd6yim0>
+    )
+    {
+        over "tn__w_pi__2_kZd6yim0" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/tn__w_pi__2_kZd6yim0/VisualMaterials/tn__w_pi_2_material_vemDeiz1>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "tn__w_pi_2_material_vemDeiz1" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_2_material_vemDeiz1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "tn__w_pi__3_kZd6yim0" (
+        prepend references = @./geometries.usd@</Geometries/tn__w_pi__3_kZd6yim0>
+    )
+    {
+        over "tn__w_pi__3_kZd6yim0" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/tn__w_pi__3_kZd6yim0/VisualMaterials/tn__w_pi_3_material_vemDeiz1>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "tn__w_pi_3_material_vemDeiz1" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_material_VtrBjio1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "tn__w_pi__4_kZd6yim0" (
+        prepend references = @./geometries.usd@</Geometries/tn__w_pi__4_kZd6yim0>
+    )
+    {
+        over "tn__w_pi__4_kZd6yim0" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/tn__w_pi__4_kZd6yim0/VisualMaterials/tn__w_pi_4_material_vemDeiz1>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "tn__w_pi_4_material_vemDeiz1" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_4_material_vemDeiz1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "tn__w_pi__5_kZd6yim0" (
+        prepend references = @./geometries.usd@</Geometries/tn__w_pi__5_kZd6yim0>
+    )
+    {
+        over "tn__w_pi__5_kZd6yim0" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/tn__w_pi__5_kZd6yim0/VisualMaterials/tn__w_pi_5_material_vemDeiz1>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "tn__w_pi_5_material_vemDeiz1" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_5_material_vemDeiz1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "tn__w_pi__6_kZd6yim0" (
+        prepend references = @./geometries.usd@</Geometries/tn__w_pi__6_kZd6yim0>
+    )
+    {
+        over "tn__w_pi__6_kZd6yim0" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/tn__w_pi__6_kZd6yim0/VisualMaterials/tn__w_pi_6_material_vemDeiz1>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "tn__w_pi_6_material_vemDeiz1" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_5_material_vemDeiz1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "tn__w_pi__7_kZd6yim0" (
+        prepend references = @./geometries.usd@</Geometries/tn__w_pi__7_kZd6yim0>
+    )
+    {
+        over "tn__w_pi__7_kZd6yim0" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/tn__w_pi__7_kZd6yim0/VisualMaterials/tn__w_pi_7_material_vemDeiz1>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "tn__w_pi_7_material_vemDeiz1" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_material_VtrBjio1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "tn__w_pi__8_kZd6yim0" (
+        prepend references = @./geometries.usd@</Geometries/tn__w_pi__8_kZd6yim0>
+    )
+    {
+        over "tn__w_pi__8_kZd6yim0" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/tn__w_pi__8_kZd6yim0/VisualMaterials/tn__w_pi_8_material_vemDeiz1>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "tn__w_pi_8_material_vemDeiz1" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_5_material_vemDeiz1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "tn__w_pi__9_kZd6yim0" (
+        prepend references = @./geometries.usd@</Geometries/tn__w_pi__9_kZd6yim0>
+    )
+    {
+        over "tn__w_pi__9_kZd6yim0" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/tn__w_pi__9_kZd6yim0/VisualMaterials/tn__w_pi_9_material_vemDeiz1>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "tn__w_pi_9_material_vemDeiz1" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_9_material_vemDeiz1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "tn__w_pi__10_xha7gyr0" (
+        prepend references = @./geometries.usd@</Geometries/tn__w_pi__10_xha7gyr0>
+    )
+    {
+        over "tn__w_pi__10_xha7gyr0" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/tn__w_pi__10_xha7gyr0/VisualMaterials/tn__w_pi_10_material_dnjErxZ2>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "tn__w_pi_10_material_dnjErxZ2" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_material_VtrBjio1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "tn__w_pi__11_xha7gyr0" (
+        prepend references = @./geometries.usd@</Geometries/tn__w_pi__11_xha7gyr0>
+    )
+    {
+        over "tn__w_pi__11_xha7gyr0" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/tn__w_pi__11_xha7gyr0/VisualMaterials/tn__w_pi_11_material_dnjErxZ2>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "tn__w_pi_11_material_dnjErxZ2" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_material_VtrBjio1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "tn__w_pi__12_xha7gyr0" (
+        prepend references = @./geometries.usd@</Geometries/tn__w_pi__12_xha7gyr0>
+    )
+    {
+        over "tn__w_pi__12_xha7gyr0" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/tn__w_pi__12_xha7gyr0/VisualMaterials/tn__w_pi_12_material_dnjErxZ2>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "tn__w_pi_12_material_dnjErxZ2" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_material_VtrBjio1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "tn__w_pi__13_xha7gyr0" (
+        prepend references = @./geometries.usd@</Geometries/tn__w_pi__13_xha7gyr0>
+    )
+    {
+        over "tn__w_pi__13_xha7gyr0" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/tn__w_pi__13_xha7gyr0/VisualMaterials/tn__w_pi_13_material_dnjErxZ2>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "tn__w_pi_13_material_dnjErxZ2" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_9_material_vemDeiz1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "tn__w_pi__14_xha7gyr0" (
+        prepend references = @./geometries.usd@</Geometries/tn__w_pi__14_xha7gyr0>
+    )
+    {
+        over "tn__w_pi__14_xha7gyr0" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/tn__w_pi__14_xha7gyr0/VisualMaterials/tn__w_pi_14_material_dnjErxZ2>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "tn__w_pi_14_material_dnjErxZ2" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_9_material_vemDeiz1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "tn__w_pi__15_xha7gyr0" (
+        prepend references = @./geometries.usd@</Geometries/tn__w_pi__15_xha7gyr0>
+    )
+    {
+        over "tn__w_pi__15_xha7gyr0" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/tn__w_pi__15_xha7gyr0/VisualMaterials/tn__w_pi_15_material_dnjErxZ2>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "tn__w_pi_15_material_dnjErxZ2" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_material_VtrBjio1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "tn__w_pi__16_xha7gyr0" (
+        prepend references = @./geometries.usd@</Geometries/tn__w_pi__16_xha7gyr0>
+    )
+    {
+        over "tn__w_pi__16_xha7gyr0" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/tn__w_pi__16_xha7gyr0/VisualMaterials/tn__w_pi_16_material_dnjErxZ2>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "tn__w_pi_16_material_dnjErxZ2" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_9_material_vemDeiz1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "tn__w_pi__17_xha7gyr0" (
+        prepend references = @./geometries.usd@</Geometries/tn__w_pi__17_xha7gyr0>
+    )
+    {
+        over "tn__w_pi__17_xha7gyr0" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/tn__w_pi__17_xha7gyr0/VisualMaterials/tn__w_pi_17_material_dnjErxZ2>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "tn__w_pi_17_material_dnjErxZ2" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_5_material_vemDeiz1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "link_1" (
+        prepend references = @./geometries.usd@</Geometries/link_1>
+    )
+    {
+        over "link_1" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/link_1/VisualMaterials/link_1_material>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "link_1_material" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_5_material_vemDeiz1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "link_2" (
+        prepend references = @./geometries.usd@</Geometries/link_2>
+    )
+    {
+        over "link_2" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/link_2/VisualMaterials/link_2_material>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "link_2_material" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_5_material_vemDeiz1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "tn__w_j3_xbk2wjb2" (
+        prepend references = @./geometries.usd@</Geometries/tn__w_j3_xbk2wjb2>
+    )
+    {
+        over "tn__w_j3_xbk2wjb2" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/tn__w_j3_xbk2wjb2/VisualMaterials/tn__w_j3_material_Ywu8kcX7>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "tn__w_j3_material_Ywu8kcX7" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_5_material_vemDeiz1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "tn__w_j3__2_zsn4sru3" (
+        prepend references = @./geometries.usd@</Geometries/tn__w_j3__2_zsn4sru3>
+    )
+    {
+        over "tn__w_j3__2_zsn4sru3" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/tn__w_j3__2_zsn4sru3/VisualMaterials/tn__w_j3_2_material_umcAXsZ8>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "tn__w_j3_2_material_umcAXsZ8" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_5_material_vemDeiz1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "tn__w_j4_xbk2wjb2" (
+        prepend references = @./geometries.usd@</Geometries/tn__w_j4_xbk2wjb2>
+    )
+    {
+        over "tn__w_j4_xbk2wjb2" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/tn__w_j4_xbk2wjb2/VisualMaterials/tn__w_j4_material_Ywu8kcX7>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "tn__w_j4_material_Ywu8kcX7" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_5_material_vemDeiz1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "tn__w_j4__2_zsn4sru3" (
+        prepend references = @./geometries.usd@</Geometries/tn__w_j4__2_zsn4sru3>
+    )
+    {
+        over "tn__w_j4__2_zsn4sru3" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/tn__w_j4__2_zsn4sru3/VisualMaterials/tn__w_j4_2_material_umcAXsZ8>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "tn__w_j4_2_material_umcAXsZ8" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_5_material_vemDeiz1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "link_5" (
+        prepend references = @./geometries.usd@</Geometries/link_5>
+    )
+    {
+        over "link_5" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/link_5/VisualMaterials/link_5_material>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "link_5_material" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_5_material_vemDeiz1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "tn__w_j6_zgh3lmU" (
+        prepend references = @./geometries.usd@</Geometries/tn__w_j6_zgh3lmU>
+    )
+    {
+        over "tn__w_j6_zgh3lmU" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/tn__w_j6_zgh3lmU/VisualMaterials/tn__w_j6_material_qrgBmyk1>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "tn__w_j6_material_qrgBmyk1" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_5_material_vemDeiz1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "tn__w_j6_xbk2wjb2" (
+        prepend references = @./geometries.usd@</Geometries/tn__w_j6_xbk2wjb2>
+    )
+    {
+        over "tn__w_j6_xbk2wjb2" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/tn__w_j6_xbk2wjb2/VisualMaterials/tn__w_j6_material_Ywu8kcX7>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "tn__w_j6_material_Ywu8kcX7" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_5_material_vemDeiz1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "tn__w_j6__2_zsn4sru3" (
+        prepend references = @./geometries.usd@</Geometries/tn__w_j6__2_zsn4sru3>
+    )
+    {
+        over "tn__w_j6__2_zsn4sru3" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/tn__w_j6__2_zsn4sru3/VisualMaterials/tn__w_j6_2_material_umcAXsZ8>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "tn__w_j6_2_material_umcAXsZ8" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_5_material_vemDeiz1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "tn__w_j6__3_zsn4sru3" (
+        prepend references = @./geometries.usd@</Geometries/tn__w_j6__3_zsn4sru3>
+    )
+    {
+        over "tn__w_j6__3_zsn4sru3" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/tn__w_j6__3_zsn4sru3/VisualMaterials/tn__w_j6_3_material_umcAXsZ8>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "tn__w_j6_3_material_umcAXsZ8" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_5_material_vemDeiz1>
+            )
+            {
+            }
+        }
+    }
+
+    def Xform "tn__w_j6__4_zsn4sru3" (
+        prepend references = @./geometries.usd@</Geometries/tn__w_j6__4_zsn4sru3>
+    )
+    {
+        over "tn__w_j6__4_zsn4sru3" (
+            apiSchemas = ["MaterialBindingAPI", "PhysicsCollisionAPI", "PhysicsMeshCollisionAPI"]
+        )
+        {
+            custom rel material:binding
+            prepend rel material:binding = </Instances/tn__w_j6__4_zsn4sru3/VisualMaterials/tn__w_j6_4_material_umcAXsZ8>
+            token physics:approximation = "convexHull"
+        }
+
+        def Scope "VisualMaterials"
+        {
+            def Material "tn__w_j6_4_material_umcAXsZ8" (
+                instanceable = true
+                prepend references = @./materials.usda@</Materials/tn__w_pi_5_material_vemDeiz1>
+            )
+            {
+            }
+        }
+    }
+}
+

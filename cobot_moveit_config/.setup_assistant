@@ -1,0 +1,10 @@
+moveit_setup_assistant_config:
+  urdf:
+    package: cobot_description
+    relative_path: description/new_mycobot_pro_320_pi_2022.urdf
+  srdf:
+    relative_path: config/firefighter.srdf
+  package_settings:
+    author_name: Muibdeen Akinyele
+    author_email: muib.akinyele@gmail.com
+    generated_timestamp: 1780878554

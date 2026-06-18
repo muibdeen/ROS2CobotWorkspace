@@ -106,7 +106,7 @@
     </collision>
   </link>
 
-  <joint name="j1" type="revolute">
+  <joint name="joint2_to_joint1" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="1000.0" lower="-2.93" upper="2.93" velocity="1.0"/>
     <parent link="base"/>
@@ -114,7 +114,7 @@
     <origin xyz="0 0 0.1739" rpy="0 0 0"/>
   </joint>
 
-  <joint name="j2" type="revolute">
+  <joint name="joint3_to_joint2" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="1000.0" lower="-2.35" upper="2.35" velocity="1.0"/>
     <parent link="link1"/>
@@ -122,7 +122,7 @@
     <origin xyz="0 -0.08878 0" rpy="0 -1.5708 1.5708"/>
   </joint>
 
-  <joint name="j3" type="revolute">
+  <joint name="joint4_to_joint3" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="1000.0" lower="-2.53" upper="2.53" velocity="1.0"/>
     <parent link="link2"/>
@@ -130,7 +130,7 @@
     <origin xyz="0.135 0 -0.08878" rpy="0 0 0"/>
   </joint>
 
-  <joint name="j4" type="revolute">
+  <joint name="joint5_to_joint4" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="1000.0" lower="-2.53" upper="2.53" velocity="1.0"/>
     <parent link="link3"/>
@@ -138,7 +138,7 @@
     <origin xyz="0.120 0 0.08878" rpy="0 0 1.57080"/>
   </joint>
 
-  <joint name="j5" type="revolute">
+  <joint name="joint6_to_joint5" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="1000.0" lower="-2.93" upper="2.93" velocity="1.0"/>
     <parent link="link4"/>
@@ -146,60 +146,60 @@
     <origin xyz="0 -0.095 0" rpy="1.5708 0 0"/>
   </joint>
 
-  <joint name="j6" type="revolute">
+  <joint name="joint6output_to_joint6" type="revolute">
     <axis xyz="0 0 1"/>
     <limit effort="1000.0" lower="-3.14" upper="3.14" velocity="1.0"/>
     <parent link="link5"/>
     <child link="link6"/>
     <origin xyz="0 0.0655 0" rpy="-1.5708 0 0"/>
   </joint>
-  <ros2_control name="CobotController" type="system">
+  <!--<ros2_control name="CobotController" type="system">
     <hardware>
       <plugin>mock_components/GenericSystem</plugin>
       <param name="calculate_dynamics">true</param>
     </hardware>
-    <joint name="j1">
-      <command_interface name="velocity">
+    <joint name="J1">
+      <command_interface name="position">
         <param name="min">-1</param>
         <param name="max">1</param>
       </command_interface>
       <state_interface name="velocity"/>
       <state_interface name="position"/>
     </joint>
-    <joint name="j2">
-      <command_interface name="velocity">
+    <joint name="J2">
+      <command_interface name="position">
         <param name="min">-1</param>
         <param name="max">1</param>
       </command_interface>
       <state_interface name="velocity"/>
       <state_interface name="position"/>
     </joint>
-    <joint name="j3">
-      <command_interface name="velocity">
+    <joint name="J3">
+      <command_interface name="position">
         <param name="min">-1</param>
         <param name="max">1</param>
       </command_interface>
       <state_interface name="velocity"/>
       <state_interface name="position"/>
     </joint>
-    <joint name="j4">
-      <command_interface name="velocity">
+    <joint name="J4">
+      <command_interface name="position">
         <param name="min">-1</param>
         <param name="max">1</param>
       </command_interface>
       <state_interface name="velocity"/>
       <state_interface name="position"/>
     </joint>
-    <joint name="j5">
-      <command_interface name="velocity">
+    <joint name="J5">
+      <command_interface name="position">
         <param name="min">-1</param>
         <param name="max">1</param>
       </command_interface>
       <state_interface name="velocity"/>
       <state_interface name="position"/>
     </joint>
-    <joint name="j6">
-      <command_interface name="velocity">
+    <joint name="J6">
+      <command_interface name="position">
         <param name="min">-1</param>
         <param name="max">1</param>
       </command_interface>
@@ -207,5 +207,5 @@
       <state_interface name="position"/>
     </joint>
 
-  </ros2_control>
+  </ros2_control> -->
 </robot>

@@ -89,7 +89,7 @@ namespace cobot_controller
       RCLCPP_WARN(get_node()->get_logger(), "command size mismatch: expected %zu joints, got %f", expected_joints_, joint_names_.size());
     return;
     }
-    
+    RCLCPP_INFO(get_node()->get_logger(), "Data written to buffer"); // Check 2
     cmd_buffer_.writeFromNonRT(*msg);
   }
 

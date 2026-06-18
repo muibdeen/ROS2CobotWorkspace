@@ -26,9 +26,8 @@ endif()
 install(DIRECTORY
 assets
 description
-include
-src
 launch
+assets
 DESTINATION share/${PROJECT_NAME}
 )
 
