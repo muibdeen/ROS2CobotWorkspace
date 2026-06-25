@@ -9,7 +9,10 @@ import os
 
 
 def generate_launch_description():
-    moveit_config = MoveItConfigsBuilder("cobot_description", package_name="cobot_moveit2_config_june").to_moveit_configs()
+    moveit_config = (MoveItConfigsBuilder("cobot_description", package_name="cobot_moveit2_config_june")
+    .trajectory_execution(file_path="config/moveit_controllers.yaml")
+    .to_moveit_configs()
+                     )
     package_share = get_package_share_directory("cobot_moveit2_config_june")
 
     use_rviz = LaunchConfiguration("use_rviz")
@@ -21,17 +24,10 @@ def generate_launch_description():
         output="screen",
         parameters=[{
             "source_list": ["/joint_state_isaac"],
-            "rate": 60,
+            "rate": 10,
         }],
     )
 
-    robot_state_publisher_node = Node(
-        package="robot_state_publisher",
-        executable="robot_state_publisher",
-        name="robot_state_publisher",
-        output="both",
-        parameters=[moveit_config.robot_description],
-    )
 
     move_group_node = Node(
         package="moveit_ros_move_group",
@@ -43,18 +39,22 @@ def generate_launch_description():
             moveit_config.robot_description_kinematics,
             moveit_config.planning_pipelines,
             moveit_config.joint_limits,
-            moveit_config.trajectory_execution,
-            {
-                "use_sim_time": True,
-                "trajectory_execution.allowed_execution_duration_scaling": 1.2,
-                "trajectory_execution.allowed_goal_duration_margin": 0.5,
-                "trajectory_execution.controller_connection_timeout": 5.0,
-                "publish_planning_scene_hz": 4.0,
-                "planning_pipelines": ["ompl", "chomp"],
-            },
+            moveit_config.trajectory_execution
 
         ],
     )
+
+    move_group_capabilities = {"capabilities": "move_group/ExecuteTaskSolutionCapability"}
+
+    run_move_group_node = Node(
+        package="moveit_ros_move_group",
+        executable="move_group",
+        output="screen",
+        parameters=[
+            moveit_config.to_dict(),
+            move_group_capabilities,
+        ],
+    )   
 
     rviz_node = Node(
         package="rviz2",
@@ -70,13 +70,32 @@ def generate_launch_description():
         ],
         condition=IfCondition(use_rviz),  # <-- correct Jazzy syntax
     )
+# static tf:
+    static_tf = Node(
+        package="tf2_ros",
+        executable="static_transform_publisher",
+        name="static_transform_publisher",
+        output="log",
+        arguments=["--frame-id", "world", "--child-frame-id", "virtual_joint"],
+    )
+
+    robot_state_publisher_node = Node(
+            package="robot_state_publisher",
+            executable="robot_state_publisher",
+            name="robot_state_publisher",
+            output="both",
+            parameters=[moveit_config.robot_description],
+    )
+
+    ros2_controllers_path=os.path.join(get_package_share_directory("cobot_moveit2_config_june"), "config", "ros2_controllers.yaml")
+   
     # 1. The Controller Manager Node (Loads the fake hardware)
     ros2_control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
         parameters=[
             moveit_config.robot_description,
-            os.path.join(package_share, "config", "ros2_controllers.yaml") # Path to your controller config
+            ros2_controllers_path # Path to your controller config
         ],
         output="screen",
     )
@@ -101,8 +120,11 @@ def generate_launch_description():
         executable="spawner",
         arguments=["end_effector_controller", "--controller-manager", "/controller_manager"],
     )
+
     return LaunchDescription([
         DeclareLaunchArgument("use_rviz", default_value="true"),
+        static_tf,
+        run_move_group_node,
         joint_state_publisher_node,
         robot_state_publisher_node,
         ros2_control_node,
