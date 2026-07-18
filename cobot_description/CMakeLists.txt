@@ -31,4 +31,8 @@ assets
 DESTINATION share/${PROJECT_NAME}
 )
 
+install(FILES
+  robot.urdf
+  DESTINATION share/${PROJECT_NAME}
+)
 ament_package()

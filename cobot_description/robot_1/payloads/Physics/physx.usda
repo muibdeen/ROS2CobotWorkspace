@@ -1,0 +1,73 @@
+#usda 1.0
+(
+    customLayerData = {
+        string creator = "URDF USD Converter v0.1.2"
+    }
+    defaultPrim = "cobot_description"
+    doc = """Generated from Composed Stage of root layer /tmp/tmpae4rj91e/cobot_description.usdc
+
+
+Generated from Composed Stage of root layer /tmp/urdf_import_robot_uucsrbkf/usdex_robot/cobot_description.usdc
+
+
+Generated from Composed Stage of root layer /tmp/urdf_import_robot_uucsrbkf/temp_robot/robot.usd
+
+
+Generated from Composed Stage of root layer /home/muib/nvidia-isaac/IsaacSim-ros_workspaces/cobot_ws/src/cobot_description/robot_1/payloads/base.usd
+"""
+    kilogramsPerUnit = 1
+    metersPerUnit = 1
+    subLayers = [
+        @./physics.usda@
+    ]
+    upAxis = "Z"
+)
+
+over "cobot_description"
+{
+    over "Physics"
+    {
+        over "joint6output_to_joint6" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:maxJointVelocity = 572.9578
+        }
+
+        over "joint6_to_joint5" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:maxJointVelocity = 572.9578
+        }
+
+        over "joint5_to_joint4" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:maxJointVelocity = 572.9578
+        }
+
+        over "joint4_to_joint3" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:maxJointVelocity = 572.9578
+        }
+
+        over "joint3_to_joint2" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:maxJointVelocity = 572.9578
+        }
+
+        over "joint2_to_joint1" (
+            prepend apiSchemas = ["PhysxJointAPI"]
+        )
+        {
+            float physxJoint:maxJointVelocity = 572.9578
+        }
+    }
+}
+
