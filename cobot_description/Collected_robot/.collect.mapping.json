@@ -1,0 +1,11 @@
+{
+    "version": "1.0",
+    "file_records": [
+        {
+            "source_url": "/home/muib/nvidia-isaac/IsaacSim-ros_workspaces/cobot_ws/src/cobot_description/robot_2/payloads/Physics/mujoco.usda",
+            "source_hash": "a91bcf225aa6f06c58c722774a91bd011c06287d",
+            "target_url": "./robot_2/payloads/Physics/mujoco.usda",
+            "target_hash": "74788455282f977460349c20d07394b4557fd1b5"
+        }
+    ]
+}
