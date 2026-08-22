@@ -34,6 +34,7 @@ setup(
             'mock_robot = cobot_rl_implement.mock_robot_node:main',
             'json_jogger = cobot_rl_implement.json_jogger:main',
             'pointcloud_jogger = cobot_rl_implement.pointcloud_jogger:main',
+            'trajectory_validator = cobot_rl_implement.trajectory_validator:main',
         ],
     },
 )

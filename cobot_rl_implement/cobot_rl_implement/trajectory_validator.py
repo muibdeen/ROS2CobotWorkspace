@@ -113,19 +113,15 @@ class TrajectoryValidator(Node):
         y = float(sample.get('y', 0.0)) / 1000.0
         z = float(sample.get('z', 0.0)) / 1000.0
 
-        # --- ORIENTATION DISABLED FOR NOW ---
-        # Your jogger's JSON currently only carries x,y,z (no r,p,y), and the
-        # jogger itself just publishes an identity quaternion. Matching that
-        # here so IK is only asked to solve for position. Re-enable this block
-        # once orientation is actually included in the trajectory JSON.
-        #
-        # r = float(sample.get('r', 0.0))
-        # p = float(sample.get('p', 0.0))
-        # yaw = float(sample.get('yaw', 0.0))
-        # if self.angles_in_degrees:
-        #     r, p, yaw = math.radians(r), math.radians(p), math.radians(yaw)
-        # qx, qy, qz, qw = euler_to_quaternion(r, p, yaw)
-        qx, qy, qz, qw = 0.0, 0.0, 0.0, 1.0  # identity — position-only check
+        r = float(sample.get('r', 0.0))
+        p = float(sample.get('p', 0.0))
+        # NOTE: check this key — your position dict already uses 'y'. Make sure
+        # your yaw field has a distinct key (e.g. 'yaw') in the source JSON.
+        yaw = float(sample.get('yaw', 0.0))
+
+        if self.angles_in_degrees:
+            r, p, yaw = math.radians(r), math.radians(p), math.radians(yaw)
+        qx, qy, qz, qw = euler_to_quaternion(r, p, yaw)
 
         ps = PoseStamped()
         ps.header.frame_id = self.base_frame
