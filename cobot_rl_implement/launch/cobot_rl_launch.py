@@ -12,13 +12,13 @@ def generate_launch_description():
     pkg_desc = get_package_share_directory("cobot_description")
     controllers = get_package_share_directory("cobot_rl_implement")
 
-    urdf_file = os.path.join(pkg_desc, "robot.urdf")
+    urdf_file = os.path.join(pkg_desc, "robot_with_ultrasound_tip.urdf")
     controllers_yaml = os.path.join(controllers, "config", "controllers.yaml")
 
     with open(urdf_file, "r") as f:
         robot_desc = f.read()
 
-    policy_path = os.path.join(pkg_rl, "exported_policy", "actor.pt")
+    policy_path = os.path.join(pkg_rl, "exported_policy", "4mm_tol.onnx")
     use_rviz = LaunchConfiguration("use_rviz")
 
     # 1. Base Infra Nodes
@@ -71,7 +71,7 @@ def generate_launch_description():
         parameters=[{
             "policy_path": policy_path,
             "base_frame": "ground_link",
-            "ee_frame": "w_j6",
+            "ee_frame": "ultrasound_tip",
         }],
         output="screen",
     )
@@ -80,6 +80,10 @@ def generate_launch_description():
         package="cobot_rl_implement",
         executable="pointcloud_jogger",
         name="jogger",
+        parameters=[{
+            "base_frame": "ground_link",
+            "ee_frame": "ultrasound_tip",
+        }],
         output="screen",
     )
 
@@ -142,7 +146,7 @@ def generate_launch_description():
         # Start infrastructure immediately
         controller_manager_node,
         robot_state_publisher_node,
-        joint_state_publisher_node,
+        #joint_state_publisher_node,
         rl_policy_node,
         rviz_node,
         
