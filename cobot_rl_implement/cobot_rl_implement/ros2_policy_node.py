@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 import os
+import json
 import rclpy
 from rclpy.node import Node
-import torch
 import numpy as np
+import onnxruntime as ort
 from sensor_msgs.msg import JointState
 from geometry_msgs.msg import Pose
 import tf2_ros
@@ -17,6 +18,8 @@ class CobotPolicyNode(Node):
 
         # ============================================================
         # CONFIGURATION — MUST MATCH TRAINING EXACTLY
+        # (cross-checked against CobotSweepPathRlEnvCfg / ActionsCfg /
+        #  ObservationsCfg / CommandsCfg)
         # ============================================================
         self.joint_names = [
             "joint2_to_joint1",
@@ -27,23 +30,65 @@ class CobotPolicyNode(Node):
             "joint6output_to_joint6",
         ]
         self.num_joints = len(self.joint_names)
-        self.action_scale = 0.5
-        self.device = torch.device("cuda")
 
-        # Default pose offsets from training (JointPositionActionCfg use_default_offset=True)
-        self.default_joint_pos = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+        # FIXED: ActionsCfg.arm_action.scale = 0.25, not 0.5.
+        self.action_scale = 0.25
 
-        # TF frame names — MUST match your URDF / robot_state_publisher
+        # Default pose offsets from training (JointPositionActionCfg use_default_offset=True).
+        # ASSUMPTION: COBOT_CFG's default joint positions are all zero. This wrapper cannot
+        # see robot_cfg.py's InitialStateCfg — if COBOT_CFG.init_state.joint_pos is non-zero,
+        # this MUST be updated to match, or every action will be offset incorrectly.
+        self.default_joint_pos = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
+
+        # TF frame names — MUST match your URDF / robot_state_publisher.
+        # FIXED default: rewards/observations key off body_names="ultrasound_tip", not
+        # "cobot_ee" (both frames exist in the URDF, but training used ultrasound_tip).
         self.base_frame = self.declare_parameter("base_frame", "ground_link").value
-        self.ee_frame = self.declare_parameter("ee_frame", "ultrasound_tip").value  # or "ultrasound_tip"
+        self.ee_frame = self.declare_parameter("ee_frame", "ultrasound_tip").value
 
+        # Orientation is NOT policy-driven: CommandsCfg.ee_pose fixed
+        # roll=pitch=yaw=0 for every single training episode, so the policy has
+        # only ever seen this one orientation target. Rather than trusting
+        # whatever orientation an upstream publisher (jogger, point-cloud
+        # pipeline, etc.) sends on /goal_pose, this node always substitutes the
+        # fixed default below when building the observation — see
+        # _on_target_pose. Default (1,0,0,0) = identity = "point down", matching
+        # training's fixed orientation. Override via this param only if that
+        # physical mapping turns out to be wrong.
+        self.fixed_target_quat = np.array(
+            self.declare_parameter("fixed_target_quat_wxyz", [1.0, 0.0, 0.0, 0.0]).value,
+            dtype=np.float32,
+        )
+
+        # Staleness guards: without these, a stalled /joint_state_isaac publisher or a
+        # stalled TF tree silently freezes joint_pos/ee_pos at their last-known values
+        # while the control loop keeps running at 60Hz off a live target — the robot
+        # then reacts only to where it's TOLD to go, not where it actually is. Both
+        # are checked every control-loop tick, not just once at startup.
+        self.max_joint_state_age_sec = self.declare_parameter(
+            "max_joint_state_age_sec", 0.2
+        ).value
+        self.max_tf_age_sec = self.declare_parameter("max_tf_age_sec", 0.2).value
+        self.last_joint_state_stamp = None
 
         # ============================================================
-        # LOAD POLICY
+        # LOAD POLICY (ONNX)
         # ============================================================
-        policy_path = self.declare_parameter("policy_path", "exported_policy/actor.onnx").value
-        self.actor = self._load_actor(policy_path)
-        self.actor.eval()
+        policy_path = self.declare_parameter("policy_path", "exported_policy/policy.onnx").value
+        # Optional: path to an EXTERNAL normalizer-stats file (json or npz with mean/var or
+        # mean/std). Leave empty by default — this export fuses the RSL-RL obs normalizer
+        # directly into the ONNX graph, so the graph itself already normalizes internally.
+        # Only set this if you later swap in a different ONNX export that does NOT fuse
+        # normalization, otherwise obs would be normalized twice.
+        norm_stats_path = self.declare_parameter("norm_stats_path", "").value
+        providers = self.declare_parameter(
+            "onnx_providers", ["CPUExecutionProvider"]
+        ).value
+
+        self.session, self.input_name, self.output_name = self._load_onnx_actor(
+            policy_path, providers
+        )
+        self.obs_normalizer = self._load_norm_stats(norm_stats_path)
 
         # ============================================================
         # ROS 2 INTERFACES
@@ -51,6 +96,11 @@ class CobotPolicyNode(Node):
         self.sub_joint_state = self.create_subscription(
             JointState, "/joint_state_isaac", self._on_joint_state, 1
         )
+        # NOTE: this target is assumed to already be in `base_frame` (ground_link), matching
+        # what mdp.generated_commands("ee_pose") produced at training time — UniformPoseCommand
+        # generates its command in the asset's ROOT/base frame, not world frame. If whatever
+        # publishes /goal_pose is giving you a world-frame target, transform it into base_frame
+        # before it reaches this node, or the policy will see an out-of-distribution command.
         self.sub_target = self.create_subscription(
             Pose, "/goal_pose", self._on_target_pose, 1
         )
@@ -65,103 +115,110 @@ class CobotPolicyNode(Node):
         # ============================================================
         # STATE
         # ============================================================
-        self.joint_pos = np.zeros(self.num_joints)
-        self.joint_vel = np.zeros(self.num_joints)
-        self.last_action = np.zeros(self.num_joints)
-        self.target_pos = np.array([0.25, 0.0, 0.3])
-        self.target_quat = np.array([1.0, 0.0, 0.0, 0.0])  # w, x, y, z
+        self.joint_pos = np.zeros(self.num_joints, dtype=np.float32)
+        self.joint_vel = np.zeros(self.num_joints, dtype=np.float32)
+        self.last_action = np.zeros(self.num_joints, dtype=np.float32)
+        self.target_pos = np.array([0.25, 0.0, 0.3], dtype=np.float32)
+        self.target_quat = self.fixed_target_quat.copy()  # w, x, y, z
         self.has_target = False
         self.has_joint_state = False
 
-        # Control loop at 60 Hz (must match training sim rate)
+        # Control loop at 60 Hz: sim.dt (1/120) * decimation (2) = 1/60. Confirmed to match
+        # CobotSweepPathRlEnvCfg.__post_init__.
         self.timer = self.create_timer(1.0 / 60.0, self._control_loop)
 
         self.get_logger().info(
             f"Node ready. Waiting for TF: {self.base_frame} -> {self.ee_frame} "
-            f"and /joint_states with joints: {self.joint_names}"
+            f"and /joint_state_isaac with joints: {self.joint_names}"
         )
 
     # ------------------------------------------------------------------
-    # POLICY LOADING
+    # POLICY LOADING (ONNX)
     # ------------------------------------------------------------------
-    def _load_actor(self, path):
+    def _load_onnx_actor(self, path, providers):
         if not os.path.exists(path):
-            raise FileNotFoundError(f"Policy not found: {path}")
+            raise FileNotFoundError(f"ONNX policy not found: {path}")
 
-        checkpoint = torch.load(path, map_location=self.device)
+        available = ort.get_available_providers()
+        chosen = [p for p in providers if p in available] or ["CPUExecutionProvider"]
 
-        # ------------------------------------------------------------------
-        # Debug: inspect all keys
-        # ------------------------------------------------------------------
-        self.get_logger().info("Checkpoint keys:")
-        for k, v in checkpoint.items():
-            if isinstance(v, torch.Tensor):
-                self.get_logger().info(f"  {k}: {v.shape}")
-            else:
-                self.get_logger().info(f"  {k}: {type(v).__name__}")
+        session = ort.InferenceSession(path, providers=chosen)
 
-        # ------------------------------------------------------------------
-        # Auto-detect MLP architecture from all mlp.*.weight keys
-        # ------------------------------------------------------------------
-        mlp_weight_keys = sorted([
-            k for k in checkpoint.keys()
-            if k.startswith("mlp.") and k.endswith(".weight")
-        ], key=lambda x: int(x.split(".")[1]))
+        inputs = session.get_inputs()
+        outputs = session.get_outputs()
+        if len(inputs) != 1 or len(outputs) < 1:
+            self.get_logger().warn(
+                f"Unexpected ONNX I/O signature — inputs: {[i.name for i in inputs]}, "
+                f"outputs: {[o.name for o in outputs]}. Using the first of each."
+            )
 
-        if not mlp_weight_keys:
-            raise RuntimeError("No 'mlp.*.weight' keys found in checkpoint")
+        input_name = inputs[0].name
+        output_name = outputs[0].name
 
-        # Build input/output dimensions list
-        dims = []
-        for k in mlp_weight_keys:
-            w = checkpoint[k]
-            if not dims:
-                dims.append(w.shape[1])  # input dimension (obs_dim)
-            dims.append(w.shape[0])      # output dimension of this layer
+        self.get_logger().info(f"Loaded ONNX policy from {path}")
+        self.get_logger().info(f"  input:  {input_name} shape={inputs[0].shape}")
+        self.get_logger().info(f"  output: {output_name} shape={outputs[0].shape}")
+        self.get_logger().info(f"  providers: {chosen}")
 
-        self.get_logger().info(f"Detected MLP layers: {mlp_weight_keys}")
-        self.get_logger().info(f"Detected MLP dimensions: {dims}")
+        expected_obs_dim = 28  # see _compute_observation for the breakdown
+        in_shape = inputs[0].shape
+        if len(in_shape) == 2 and isinstance(in_shape[1], int) and in_shape[1] != expected_obs_dim:
+            self.get_logger().warn(
+                f"ONNX input dim ({in_shape[1]}) != expected obs dim ({expected_obs_dim}) "
+                f"computed from ObservationsCfg (joint_pos_rel[6] + joint_vel_rel[6] + "
+                f"target_pose[7] + ee_pos_err[3] + last_action[6]). Double check the export "
+                f"matches training, or that ee_pos_error's true dimensionality matches the "
+                f"assumption made here."
+            )
 
-        # Build matching Sequential dynamically
-        layers = []
-        for i in range(len(dims) - 1):
-            layers.append(torch.nn.Linear(dims[i], dims[i + 1]))
-            # Add ELU between layers, but NOT after the final output layer
-            if i < len(dims) - 2:
-                layers.append(torch.nn.ELU())
+        return session, input_name, output_name
 
-        actor = torch.nn.Sequential(*layers).to(self.device)
+    def _load_norm_stats(self, path):
+        """Load an optional EXTERNAL obs-normalizer (mean/var or mean/std).
 
-        # Load weights (strip 'mlp.' prefix to match Sequential indexing)
-        mlp_state = {
-            k.replace("mlp.", ""): v
-            for k, v in checkpoint.items()
-            if k.startswith("mlp.")
-        }
-        actor.load_state_dict(mlp_state)
+        Not needed for this policy_path — the obs normalizer is fused into the ONNX
+        graph itself, so the graph already normalizes internally and this returns None
+        (a pass-through) by default. Only populate norm_stats_path if you swap in a
+        different ONNX export that does NOT fuse normalization.
+        """
+        if not path:
+            self.get_logger().info(
+                "No norm_stats_path set — obs normalizer is fused into the ONNX graph, "
+                "so raw observations are passed through unchanged before inference."
+            )
+            return None
 
-        # ------------------------------------------------------------------
-        # Load observation normalizer
-        # ------------------------------------------------------------------
-        self.obs_normalizer = None
-        norm_keys = [k for k in checkpoint.keys() if k.startswith("obs_normalizer.")]
-        if norm_keys:
-            norm_state = {
-                k.replace("obs_normalizer.", ""): v
-                for k, v in checkpoint.items()
-                if k.startswith("obs_normalizer.")
-            }
-            self.obs_normalizer = {
-                "mean": norm_state["_mean"].to(self.device),
-                "var": norm_state["_var"].to(self.device),
-                "std": norm_state["_std"].to(self.device),
-            }
-            self.get_logger().info("Loaded observation normalizer")
+        if not os.path.exists(path):
+            raise FileNotFoundError(f"norm_stats_path not found: {path}")
+
+        if path.endswith(".npz"):
+            data = np.load(path)
+            mean = data["mean"].astype(np.float32)
+            std = data["std"].astype(np.float32) if "std" in data else np.sqrt(
+                data["var"].astype(np.float32) + 1e-8
+            )
         else:
-            self.get_logger().warn("No observation normalizer found in checkpoint")
+            with open(path, "r") as f:
+                data = json.load(f)
+            mean = np.array(data["mean"], dtype=np.float32)
+            std = (
+                np.array(data["std"], dtype=np.float32)
+                if "std" in data
+                else np.sqrt(np.array(data["var"], dtype=np.float32) + 1e-8)
+            )
 
-        self.get_logger().info(f"Successfully loaded actor from {path}")
-        return actor
+        self.get_logger().info(f"Loaded external obs normalizer from {path}")
+        return {"mean": mean, "std": std}
+
+    def _normalize_obs(self, obs):
+        # No-op in the default configuration: the ONNX graph already normalizes
+        # internally, so raw observations pass straight through to session.run().
+        if self.obs_normalizer is None:
+            return obs
+        mean = self.obs_normalizer["mean"]
+        std = self.obs_normalizer["std"]
+        return (obs - mean) / (std + 1e-8)
+
     # ------------------------------------------------------------------
     # CALLBACKS
     # ------------------------------------------------------------------
@@ -173,107 +230,103 @@ class CobotPolicyNode(Node):
                 if msg.velocity and len(msg.velocity) > idx:
                     self.joint_vel[i] = msg.velocity[idx]
         self.has_joint_state = True
+        # Record when THIS node received the message, not the message's own header
+        # stamp — some Isaac/hardware bridges leave header.stamp at 0, which would
+        # make every staleness check below trivially fail (always "infinitely old").
+        self.last_joint_state_stamp = self.get_clock().now()
 
     def _on_target_pose(self, msg: Pose):
-        self.target_pos = np.array([msg.position.x, msg.position.y, msg.position.z])
-        self.target_quat = np.array([
-            msg.orientation.w,
-            msg.orientation.x,
-            msg.orientation.y,
-            msg.orientation.z,
-        ])
+        # Position: ASSUMED already in base_frame — see subscription comment above.
+        self.target_pos = np.array(
+            [msg.position.x, msg.position.y, msg.position.z], dtype=np.float32
+        )
+        # Orientation: intentionally IGNORED from the incoming message. Always use
+        # the fixed default (point-down) set at startup — see comment near
+        # fixed_target_quat in __init__ for why.
+        self.target_quat = self.fixed_target_quat
         self.has_target = True
-    def _normalize_obs(self, obs):
-        if self.obs_normalizer is None:
-            return obs
-        mean = self.obs_normalizer["mean"]
-        std = self.obs_normalizer["std"]
-        return (obs - mean) / (std + 1e-8)
+
     # ------------------------------------------------------------------
     # TF2 FORWARD KINEMATICS
     # ------------------------------------------------------------------
-    def _get_ee_pose_from_tf(self):
+    def _get_ee_pos_from_tf(self):
+        """Only position is needed now — ee_pos_error uses position only per
+        custom_mdp.ee_pos_error (see caveat in _compute_observation)."""
         try:
-            # lookup_transform(target_frame, source_frame, time)
             trans = self.tf_buffer.lookup_transform(
                 self.base_frame,
                 self.ee_frame,
                 rclpy.time.Time(),
             )
-            pos = np.array([
-                trans.transform.translation.x,
-                trans.transform.translation.y,
-                trans.transform.translation.z,
-            ])
-            quat = np.array([
-                trans.transform.rotation.w,
-                trans.transform.rotation.x,
-                trans.transform.rotation.y,
-                trans.transform.rotation.z,
-            ])
-            return pos, quat
+            tf_age_sec = (self.get_clock().now() - rclpy.time.Time.from_msg(
+                trans.header.stamp
+            )).nanoseconds / 1e9
+            if tf_age_sec > self.max_tf_age_sec:
+                self.get_logger().warn(
+                    f"TF {self.base_frame}->{self.ee_frame} is stale "
+                    f"({tf_age_sec:.3f}s old, limit={self.max_tf_age_sec}s). "
+                    f"ee_pos_err will be computed from an outdated position.",
+                    throttle_duration_sec=1.0,
+                )
+            pos = np.array(
+                [
+                    trans.transform.translation.x,
+                    trans.transform.translation.y,
+                    trans.transform.translation.z,
+                ],
+                dtype=np.float32,
+            )
+            return pos
         except TransformException as e:
             self.get_logger().warn(
                 f"TF lookup {self.base_frame}->{self.ee_frame} failed: {e}",
                 throttle_duration_sec=2.0,
             )
-            return None, None
+            return None
 
     # ------------------------------------------------------------------
-    # MATH UTILS
-    # ------------------------------------------------------------------
-    @staticmethod
-    def _quat_mul(q1, q2):
-        w1, x1, y1, z1 = q1
-        w2, x2, y2, z2 = q2
-        return np.array([
-            w1*w2 - x1*x2 - y1*y2 - z1*z2,
-            w1*x2 + x1*w2 + y1*z2 - z1*y2,
-            w1*y2 - x1*z2 + y1*w2 + z1*x2,
-            w1*z2 + x1*y2 - y1*x2 + z1*w2,
-        ])
-
-    @staticmethod
-    def _quat_conjugate(q):
-        return np.array([q[0], -q[1], -q[2], -q[3]])
-
-# ------------------------------------------------------------------
     # OBSERVATION BUILDER
     # ------------------------------------------------------------------
     def _compute_observation(self):
-        # 1. Joint positions relative to default
+        # 1. Joint positions relative to default — mdp.joint_pos_rel
         joint_pos_rel = self.joint_pos - self.default_joint_pos
 
-        # 2. Joint velocities
+        # 2. Joint velocities — mdp.joint_vel_rel
         joint_vel_rel = self.joint_vel
 
-        # 3. Current End Effector Pose (from TF)
-        ee_pos, ee_quat = self._get_ee_pose_from_tf()
-        if ee_pos is None:
-            # Prevent crash if TF drops, though it invalidates this step
-            self.get_logger().warn("Missing TF, feeding zeros to policy", throttle_duration_sec=1.0)
-            ee_pos = np.zeros(3)
-            ee_quat = np.array([1.0, 0.0, 0.0, 0.0])
-        
-        ee_pose = np.concatenate([ee_pos, ee_quat])
+        # 3. Commanded target pose — mdp.generated_commands("ee_pose")
+        #    UniformPoseCommandCfg output is (pos[3], quat_wxyz[4]) in the robot's base frame.
+        target_pose = np.concatenate([self.target_pos, self.target_quat]).astype(np.float32)
 
-        # 4. Target pose command (position + quaternion)
-        target_pose = np.concatenate([self.target_pos, self.target_quat])
-        
-        # 5. Last action
+        # 4. End-effector position error — custom_mdp.ee_pos_error
+        #    *** ASSUMPTION, NOT VERIFIED ***: implemented here as (target - current ee pos),
+        #    a 3-vector, matching the SceneEntityCfg(body_names="ultrasound_tip") used in both
+        #    the observation and the position_command_error reward. If custom_mdp.py computes
+        #    this differently (different frame, normalization, includes orientation, etc.),
+        #    update this block to match exactly — paste custom_mdp.py to verify.
+        ee_pos = self._get_ee_pos_from_tf()
+        if ee_pos is None:
+            self.get_logger().warn("Missing TF, feeding zeros to policy", throttle_duration_sec=1.0)
+            ee_pos = np.zeros(3, dtype=np.float32)
+        ee_pos_err = (self.target_pos - ee_pos).astype(np.float32)
+
+        # 5. Last action — custom_mdp.last_action_obs (raw, unscaled action)
         last_action = self.last_action
 
-        # MUST match the order and dimensions of ObservationsCfg exactly!
-        # joint_pos(6) + joint_vel(6) + ee_pose(7) + pose_command(7) + actions(6) = 32 dims
-        obs = np.concatenate([
-            joint_pos_rel,      # [0:6]
-            joint_vel_rel,      # [6:12]
-            ee_pose,            # [12:19]
-            target_pose,        # [19:26]
-            last_action         # [26:32]
-        ]).astype(np.float32)
+        # Order MUST match ObservationsCfg.PolicyCfg exactly:
+        # joint_pos_rel(6) + joint_vel_rel(6) + target_pose(7) + ee_pos_err(3) + last_action(6)
+        # = 28 dims total
+        obs = np.concatenate(
+            [
+                joint_pos_rel,   # [0:6]
+                joint_vel_rel,   # [6:12]
+                target_pose,     # [12:19]
+                ee_pos_err,      # [19:22]
+                last_action,     # [22:28]
+            ]
+        ).astype(np.float32)
 
-        return torch.from_numpy(obs).unsqueeze(0).to(self.device)
+        return obs.reshape(1, -1)
 
     # ------------------------------------------------------------------
     # CONTROL LOOP
@@ -285,25 +338,40 @@ class CobotPolicyNode(Node):
         if not self.has_target:
             return
 
-        with torch.no_grad():
-            obs = self._compute_observation()
-            obs = self._normalize_obs(obs)
-            action = self.actor(obs).cpu().numpy().flatten()
+        # Staleness gate: has_joint_state only tells us a message arrived AT SOME POINT.
+        # If the publisher stalls afterward, joint_pos/joint_vel would otherwise stay
+        # frozen while this loop keeps commanding actions off a live target — i.e. the
+        # robot moves toward the goal without actually checking its current position.
+        joint_state_age_sec = (
+            self.get_clock().now() - self.last_joint_state_stamp
+        ).nanoseconds / 1e9
+        if joint_state_age_sec > self.max_joint_state_age_sec:
+            self.get_logger().warn(
+                f"/joint_state_isaac is stale ({joint_state_age_sec:.3f}s old, "
+                f"limit={self.max_joint_state_age_sec}s). Holding last command rather "
+                f"than acting on outdated feedback.",
+                throttle_duration_sec=1.0,
+            )
+            return
 
-            # Scale to joint deltas (matches JointPositionActionCfg)
-            scaled_action = action * self.action_scale
+        obs = self._compute_observation()
+        obs = self._normalize_obs(obs)
 
-            # Add default offset
-            target_joint_pos = self.default_joint_pos + scaled_action
+        outputs = self.session.run([self.output_name], {self.input_name: obs})
+        action = np.asarray(outputs[0]).flatten().astype(np.float32)
 
-            # Publish as JointState
-            msg = Float64MultiArray()
-            msg.data = target_joint_pos.tolist()
- 
-            self.pub_command.publish(msg)
+        # Scale to joint deltas (matches JointPositionActionCfg.scale = 0.25)
+        scaled_action = action * self.action_scale
 
-            # Store unscaled action for next observation
-            self.last_action = action
+        # Add default offset
+        target_joint_pos = self.default_joint_pos + scaled_action
+
+        msg = Float64MultiArray()
+        msg.data = target_joint_pos.tolist()
+        self.pub_command.publish(msg)
+
+        # Store unscaled action for next observation (matches custom_mdp.last_action_obs)
+        self.last_action = action
 
 
 def main(args=None):
